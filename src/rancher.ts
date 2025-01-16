@@ -110,7 +110,9 @@ class Rancher {
       return req2.json() as Promise<Workload>;
     } else {
       const data: any = await req.json();
-      data.containers[0].image = config.image;
+      data.containers.forEach(e => {
+        e.image = config.image;
+      });
 
       const {actions} = data;
       const req2 = await fetch(actions.redeploy, {
