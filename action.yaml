@@ -20,6 +20,9 @@ inputs:
   dockerImage:
     description: "Docker Image ID"
     required: true
+  projectId:
+    description: "ID of the project"
+    required: false
   namespaceId:
     description: "ID of the namespace"
     required: false
