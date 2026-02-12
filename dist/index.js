@@ -1,246 +1,9 @@
-/******/ (() => { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 183:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputs = void 0;
-const core = __importStar(__nccwpck_require__(484));
-function getInputs() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!process.env.GITHUB_ACTIONS) {
-            return {
-                rancher: {
-                    accessKey: process.env['RANCHER_ACCESS_KEY'] || '',
-                    secretKey: process.env['RANCHER_SECRET_KEY'] || '',
-                    urlApi: process.env['RANCHER_URL_API'] || ''
-                },
-                serviceName: process.env['SERVICE_NAME'] || '',
-                dockerImage: process.env['DOCKER_IMAGE'] || '',
-                projectId: process.env['PROJECT_ID'],
-                namespaceId: process.env['NAMESPACE_ID'],
-                targetContainers: process.env['TARGET_CONTAINERS'] ? process.env['TARGET_CONTAINERS'].split(',').map(Number) : undefined
-            };
-        }
-        return {
-            rancher: {
-                accessKey: core.getInput('rancherAccessKey'),
-                secretKey: core.getInput('rancherSecretKey'),
-                urlApi: core.getInput('rancherUrlApi')
-            },
-            serviceName: core.getInput('serviceName'),
-            dockerImage: core.getInput('dockerImage'),
-            projectId: core.getInput('projectId'),
-            namespaceId: core.getInput('namespaceId'),
-            targetContainers: core.getInput('targetContainers') ? core.getInput('targetContainers').split(',').map(Number) : undefined
-        };
-    });
-}
-exports.getInputs = getInputs;
-//# sourceMappingURL=context.js.map
-
-/***/ }),
-
-/***/ 915:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(484));
-const context_1 = __nccwpck_require__(183);
-const rancher_1 = __importDefault(__nccwpck_require__(885));
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    const input = yield (0, context_1.getInputs)();
-    const { rancher, dockerImage, serviceName, projectId, namespaceId } = input;
-    const client = new rancher_1.default(rancher.urlApi, rancher.accessKey, rancher.secretKey);
-    let findOne = false;
-    const { data: projects } = yield client.fetchProjectsAsync(projectId);
-    for (const project of projects) {
-        const { data: workloads } = yield client.fetchProjectWorkloadsAsync(project);
-        for (const workload of workloads) {
-            const result = yield client.changeImageAsync(workload, {
-                name: serviceName,
-                image: dockerImage
-            }, input.targetContainers);
-            core.info(`Image changed for ${result.id}`);
-            findOne = true;
-        }
-    }
-    if (!findOne) {
-        throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
-    }
-}))().catch(err => {
-    core.setFailed(err.message);
-});
-//# sourceMappingURL=main.js.map
-
-/***/ }),
-
-/***/ 885:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const node_fetch_1 = __importDefault(__nccwpck_require__(920));
-class Rancher {
-    constructor(rancherUrlApi, rancherAccessKey, rancherSecretKey) {
-        this.rancherUrlApi = rancherUrlApi;
-        const token = Buffer.from(rancherAccessKey + ':' + rancherSecretKey).toString('base64');
-        this.headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: 'Basic ' + token,
-        };
-    }
-    fetchProjectsAsync(projectId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const url = new URL(`${this.rancherUrlApi}/projects`);
-            if (projectId) {
-                url.searchParams.append('id', projectId);
-            }
-            const req = yield (0, node_fetch_1.default)(url.toString(), {
-                method: 'GET',
-                headers: this.headers
-            });
-            return req.json();
-        });
-    }
-    fetchProjectWorkloadsAsync(project, namespaceId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { links } = project;
-            const url = new URL(links.workloads);
-            if (namespaceId) {
-                url.searchParams.append('namespaceId', namespaceId);
-            }
-            const req = yield (0, node_fetch_1.default)(url.toString(), {
-                method: 'GET',
-                headers: this.headers
-            });
-            return req.json();
-        });
-    }
-    changeImageAsync(wl, config, targetContainers = [0]) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { links } = wl;
-            const req = yield (0, node_fetch_1.default)(links.self, { method: 'GET', headers: this.headers });
-            if (req.status === 404) {
-                const data = {
-                    containers: [
-                        Object.assign(Object.assign({}, config), { imagePullPolicy: 'Always' })
-                    ],
-                    name: config.name,
-                    namespaceId: wl.namespaceId
-                };
-                const req2 = yield (0, node_fetch_1.default)(links.update, {
-                    method: 'POST',
-                    headers: this.headers,
-                    body: JSON.stringify(data)
-                });
-                return req2.json();
-            }
-            else {
-                const data = yield req.json();
-                for (const index of targetContainers) {
-                    if (data.containers[index]) {
-                        data.containers[index].image = config.image;
-                    }
-                }
-                const { actions } = data;
-                const req2 = yield (0, node_fetch_1.default)(actions.redeploy, {
-                    method: 'PUT',
-                    headers: this.headers,
-                    body: JSON.stringify(data)
-                });
-                return req2.json();
-            }
-        });
-    }
-}
-exports["default"] = Rancher;
-//# sourceMappingURL=rancher.js.map
-
-/***/ }),
+import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
+/******/ var __webpack_modules__ = ({
 
 /***/ 914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -339,7 +102,6 @@ function escapeProperty(s) {
 /***/ 484:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -658,7 +420,6 @@ exports.getIDToken = getIDToken;
 /***/ 753:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
-"use strict";
 
 // For internal use, subject to change.
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -707,7 +468,6 @@ exports.issueCommand = issueCommand;
 /***/ 306:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
-"use strict";
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -791,7 +551,6 @@ exports.OidcClient = OidcClient;
 /***/ 302:
 /***/ ((__unused_webpack_module, exports) => {
 
-"use strict";
 
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -838,7 +597,6 @@ exports.toCommandProperties = toCommandProperties;
 /***/ 684:
 /***/ ((__unused_webpack_module, exports) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class BasicCredentialHandler {
@@ -904,7 +662,6 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 /***/ 192:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const http = __nccwpck_require__(611);
@@ -1449,7 +1206,6 @@ exports.HttpClient = HttpClient;
 /***/ 624:
 /***/ ((__unused_webpack_module, exports) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 function getProxyUrl(reqUrl) {
@@ -1514,7 +1270,6 @@ exports.checkBypass = checkBypass;
 /***/ 432:
 /***/ ((module) => {
 
-"use strict";
 
 /**
  * Returns a `Buffer` instance from the given data URI `uri`.
@@ -1583,7 +1338,6 @@ module.exports = __nccwpck_require__(218);
 /***/ 218:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
-"use strict";
 
 
 var net = __nccwpck_require__(278);
@@ -6062,104 +5816,91 @@ exports.debug = debug; // for test
 /***/ 613:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("assert");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("assert");
 
 /***/ }),
 
 /***/ 181:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("buffer");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("buffer");
 
 /***/ }),
 
 /***/ 434:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("events");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("events");
 
 /***/ }),
 
 /***/ 896:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("fs");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs");
 
 /***/ }),
 
 /***/ 611:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("http");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("http");
 
 /***/ }),
 
 /***/ 692:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("https");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("https");
 
 /***/ }),
 
 /***/ 278:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("net");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
 
 /***/ }),
 
 /***/ 708:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("node:process");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
 
 /***/ }),
 
 /***/ 830:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("node:stream/web");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:stream/web");
 
 /***/ }),
 
 /***/ 857:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("os");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("os");
 
 /***/ }),
 
 /***/ 928:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("path");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("path");
 
 /***/ }),
 
 /***/ 756:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("tls");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("tls");
 
 /***/ }),
 
 /***/ 23:
 /***/ ((module) => {
 
-"use strict";
-module.exports = require("util");
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util");
 
 /***/ }),
 
@@ -6219,34 +5960,89 @@ try {
 /* c8 ignore end */
 
 
-/***/ }),
+/***/ })
 
-/***/ 920:
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+/******/ });
+/************************************************************************/
+/******/ // The module cache
+/******/ var __webpack_module_cache__ = {};
+/******/ 
+/******/ // The require function
+/******/ function __nccwpck_require__(moduleId) {
+/******/ 	// Check if module is in cache
+/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 	if (cachedModule !== undefined) {
+/******/ 		return cachedModule.exports;
+/******/ 	}
+/******/ 	// Create a new module (and put it into the cache)
+/******/ 	var module = __webpack_module_cache__[moduleId] = {
+/******/ 		// no module.id needed
+/******/ 		// no module.loaded needed
+/******/ 		exports: {}
+/******/ 	};
+/******/ 
+/******/ 	// Execute the module function
+/******/ 	var threw = true;
+/******/ 	try {
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 		threw = false;
+/******/ 	} finally {
+/******/ 		if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 	}
+/******/ 
+/******/ 	// Return the exports of the module
+/******/ 	return module.exports;
+/******/ }
+/******/ 
+/************************************************************************/
+/******/ /* webpack/runtime/compat */
+/******/ 
+/******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
+/******/ 
+/************************************************************************/
+var __webpack_exports__ = {};
 
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(484);
+;// CONCATENATED MODULE: ./lib/context.js
 
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  AbortError: () => (/* reexport */ AbortError),
-  FetchError: () => (/* reexport */ FetchError),
-  Headers: () => (/* reexport */ Headers),
-  Request: () => (/* reexport */ Request),
-  Response: () => (/* reexport */ Response),
-  "default": () => (/* binding */ fetch),
-  isRedirect: () => (/* reexport */ isRedirect)
-});
-
+async function getInputs() {
+    if (!process.env.GITHUB_ACTIONS) {
+        return {
+            rancher: {
+                accessKey: process.env['RANCHER_ACCESS_KEY'] || '',
+                secretKey: process.env['RANCHER_SECRET_KEY'] || '',
+                urlApi: process.env['RANCHER_URL_API'] || ''
+            },
+            serviceName: process.env['SERVICE_NAME'] || '',
+            dockerImage: process.env['DOCKER_IMAGE'] || '',
+            projectId: process.env['PROJECT_ID'],
+            namespaceId: process.env['NAMESPACE_ID'],
+            targetContainers: process.env['TARGET_CONTAINERS'] ? process.env['TARGET_CONTAINERS'].split(',').map(Number) : undefined
+        };
+    }
+    return {
+        rancher: {
+            accessKey: core.getInput('rancherAccessKey'),
+            secretKey: core.getInput('rancherSecretKey'),
+            urlApi: core.getInput('rancherUrlApi')
+        },
+        serviceName: core.getInput('serviceName'),
+        dockerImage: core.getInput('dockerImage'),
+        projectId: core.getInput('projectId'),
+        namespaceId: core.getInput('namespaceId'),
+        targetContainers: core.getInput('targetContainers') ? core.getInput('targetContainers').split(',').map(Number) : undefined
+    };
+}
+//# sourceMappingURL=context.js.map
 // EXTERNAL MODULE: external "http"
 var external_http_ = __nccwpck_require__(611);
 // EXTERNAL MODULE: external "https"
 var external_https_ = __nccwpck_require__(692);
 ;// CONCATENATED MODULE: external "zlib"
-const external_zlib_namespaceObject = require("zlib");
+const external_zlib_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("zlib");
 ;// CONCATENATED MODULE: external "stream"
-const external_stream_namespaceObject = require("stream");
+const external_stream_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream");
 // EXTERNAL MODULE: ./node_modules/data-uri-to-buffer/dist/src/index.js
 var src = __nccwpck_require__(432);
 // EXTERNAL MODULE: external "util"
@@ -6554,7 +6350,7 @@ class FetchError extends FetchBaseError {
 }
 
 ;// CONCATENATED MODULE: external "crypto"
-const external_crypto_namespaceObject = require("crypto");
+const external_crypto_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("crypto");
 ;// CONCATENATED MODULE: ./node_modules/node-fetch/src/utils/is.js
 /**
  * Is.js
@@ -7524,7 +7320,7 @@ Object.defineProperties(Response.prototype, {
 });
 
 ;// CONCATENATED MODULE: external "url"
-const external_url_namespaceObject = require("url");
+const external_url_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("url");
 ;// CONCATENATED MODULE: ./node_modules/node-fetch/src/utils/get-search.js
 const getSearch = parsedURL => {
 	if (parsedURL.search) {
@@ -8109,81 +7905,108 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
 	});
 }
 
+;// CONCATENATED MODULE: ./lib/rancher.js
 
-/***/ })
+class Rancher {
+    rancherUrlApi;
+    headers;
+    constructor(rancherUrlApi, rancherAccessKey, rancherSecretKey) {
+        this.rancherUrlApi = rancherUrlApi;
+        const token = Buffer.from(rancherAccessKey + ':' + rancherSecretKey).toString('base64');
+        this.headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Basic ' + token,
+        };
+    }
+    async fetchProjectsAsync(projectId) {
+        const url = new URL(`${this.rancherUrlApi}/projects`);
+        if (projectId) {
+            url.searchParams.append('id', projectId);
+        }
+        const req = await fetch(url.toString(), {
+            method: 'GET',
+            headers: this.headers
+        });
+        return req.json();
+    }
+    async fetchProjectWorkloadsAsync(project, namespaceId) {
+        const { links } = project;
+        const url = new URL(links.workloads);
+        if (namespaceId) {
+            url.searchParams.append('namespaceId', namespaceId);
+        }
+        const req = await fetch(url.toString(), {
+            method: 'GET',
+            headers: this.headers
+        });
+        return req.json();
+    }
+    async changeImageAsync(wl, config, targetContainers = [0]) {
+        const { links } = wl;
+        const req = await fetch(links.self, { method: 'GET', headers: this.headers });
+        if (req.status === 404) {
+            const data = {
+                containers: [
+                    {
+                        ...config,
+                        imagePullPolicy: 'Always'
+                    }
+                ],
+                name: config.name,
+                namespaceId: wl.namespaceId
+            };
+            const req2 = await fetch(links.update, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify(data)
+            });
+            return req2.json();
+        }
+        else {
+            const data = await req.json();
+            for (const index of targetContainers) {
+                if (data.containers[index]) {
+                    data.containers[index].image = config.image;
+                }
+            }
+            const { actions } = data;
+            const req2 = await fetch(actions.redeploy, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify(data)
+            });
+            return req2.json();
+        }
+    }
+}
+/* harmony default export */ const lib_rancher = (Rancher);
+//# sourceMappingURL=rancher.js.map
+;// CONCATENATED MODULE: ./lib/main.js
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __nccwpck_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
-/******/ 		}
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/compat */
-/******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(915);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
-/******/ })()
-;
+
+
+(async () => {
+    const input = await getInputs();
+    const { rancher, dockerImage, serviceName, projectId, namespaceId } = input;
+    const client = new lib_rancher(rancher.urlApi, rancher.accessKey, rancher.secretKey);
+    let findOne = false;
+    const { data: projects } = await client.fetchProjectsAsync(projectId);
+    for (const project of projects) {
+        const { data: workloads } = await client.fetchProjectWorkloadsAsync(project);
+        for (const workload of workloads) {
+            const result = await client.changeImageAsync(workload, {
+                name: serviceName,
+                image: dockerImage
+            }, input.targetContainers);
+            core.info(`Image changed for ${result.id}`);
+            findOne = true;
+        }
+    }
+    if (!findOne) {
+        throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
+    }
+})().catch(err => {
+    core.setFailed(err);
+});
+//# sourceMappingURL=main.js.map

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
-import {getInputs} from './context';
-import Rancher from './rancher';
+import {getInputs} from './context.js';
+import Rancher from './rancher.js';
 
 (async () => {
   const input = await getInputs();
