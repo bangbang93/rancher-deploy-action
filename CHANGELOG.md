@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/bangbang93/rancher-deploy-action/compare/v0.2.1...v0.2.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* 优化错误信息 ([2722491](https://github.com/bangbang93/rancher-deploy-action/commit/2722491f7ea699b193b6843ff12af44a1a8e2584))
+
 ## [0.2.1](https://github.com/bangbang93/rancher-deploy-action/compare/v0.2.0...v0.2.1) (2026-02-12)
 
 
