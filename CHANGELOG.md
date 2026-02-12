@@ -1,5 +1,18 @@
 # Changelog
 
+# [0.3.0](https://github.com/bangbang93/rancher-deploy-action/compare/v0.2.2...v0.3.0) (2026-02-12)
+
+
+### Bug Fixes
+
+* 优化错误处理和日志信息 ([941cb04](https://github.com/bangbang93/rancher-deploy-action/commit/941cb04d463fcb037385b1217deb349d855298d5))
+* redeploy应该是POST请求 ([3597f24](https://github.com/bangbang93/rancher-deploy-action/commit/3597f241ddfc2d7dc37d77d699f5bf92af7a12c3))
+
+
+### Features
+
+* 升级typescript版本 ([7605401](https://github.com/bangbang93/rancher-deploy-action/commit/76054012a897ac6d02c232df4060574b15f1cc8c))
+
 ## [0.2.2](https://github.com/bangbang93/rancher-deploy-action/compare/v0.2.1...v0.2.2) (2026-02-12)
 
 
