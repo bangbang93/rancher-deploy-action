@@ -48,7 +48,9 @@ function getInputs() {
                 },
                 serviceName: process.env['SERVICE_NAME'] || '',
                 dockerImage: process.env['DOCKER_IMAGE'] || '',
-                namespaceId: process.env['NAMESPACE_ID']
+                projectId: process.env['PROJECT_ID'],
+                namespaceId: process.env['NAMESPACE_ID'],
+                targetContainers: process.env['TARGET_CONTAINERS'] ? process.env['TARGET_CONTAINERS'].split(',').map(Number) : undefined
             };
         }
         return {
@@ -59,7 +61,9 @@ function getInputs() {
             },
             serviceName: core.getInput('serviceName'),
             dockerImage: core.getInput('dockerImage'),
-            namespaceId: core.getInput('namespaceId')
+            projectId: core.getInput('projectId'),
+            namespaceId: core.getInput('namespaceId'),
+            targetContainers: core.getInput('targetContainers') ? core.getInput('targetContainers').split(',').map(Number) : undefined
         };
     });
 }
@@ -109,26 +113,24 @@ const core = __importStar(__nccwpck_require__(484));
 const context_1 = __nccwpck_require__(183);
 const rancher_1 = __importDefault(__nccwpck_require__(885));
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    const { rancher, dockerImage, serviceName, namespaceId } = yield (0, context_1.getInputs)();
+    const input = yield (0, context_1.getInputs)();
+    const { rancher, dockerImage, serviceName, projectId, namespaceId } = input;
     const client = new rancher_1.default(rancher.urlApi, rancher.accessKey, rancher.secretKey);
-    const { data: projects } = yield client.fetchProjectsAsync();
+    let findOne = false;
+    const { data: projects } = yield client.fetchProjectsAsync(projectId);
     for (const project of projects) {
         const { data: workloads } = yield client.fetchProjectWorkloadsAsync(project);
-        const workload = workloads.find(({ name, namespaceId: nsId }) => name === serviceName && (!namespaceId || namespaceId === nsId));
-        if (workload) {
+        for (const workload of workloads) {
             const result = yield client.changeImageAsync(workload, {
                 name: serviceName,
                 image: dockerImage
-            });
+            }, input.targetContainers);
             core.info(`Image changed for ${result.id}`);
-            return;
+            findOne = true;
         }
     }
-    if (namespaceId) {
-        throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}"`);
-    }
-    else {
-        throw new Error(`Couldn't found workload "${serviceName}"`);
+    if (!findOne) {
+        throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
     }
 }))().catch(err => {
     core.setFailed(err.message);
@@ -166,26 +168,34 @@ class Rancher {
             Authorization: 'Basic ' + token,
         };
     }
-    fetchProjectsAsync() {
+    fetchProjectsAsync(projectId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const req = yield (0, node_fetch_1.default)(`${this.rancherUrlApi}/projects`, {
+            const url = new URL(`${this.rancherUrlApi}/projects`);
+            if (projectId) {
+                url.searchParams.append('id', projectId);
+            }
+            const req = yield (0, node_fetch_1.default)(url.toString(), {
                 method: 'GET',
                 headers: this.headers
             });
             return req.json();
         });
     }
-    fetchProjectWorkloadsAsync(project) {
+    fetchProjectWorkloadsAsync(project, namespaceId) {
         return __awaiter(this, void 0, void 0, function* () {
             const { links } = project;
-            const req = yield (0, node_fetch_1.default)(links.workloads, {
+            const url = new URL(links.workloads);
+            if (namespaceId) {
+                url.searchParams.append('namespaceId', namespaceId);
+            }
+            const req = yield (0, node_fetch_1.default)(url.toString(), {
                 method: 'GET',
                 headers: this.headers
             });
             return req.json();
         });
     }
-    changeImageAsync(wl, config) {
+    changeImageAsync(wl, config, targetContainers = [0]) {
         return __awaiter(this, void 0, void 0, function* () {
             const { links } = wl;
             const req = yield (0, node_fetch_1.default)(links.self, { method: 'GET', headers: this.headers });
@@ -206,9 +216,11 @@ class Rancher {
             }
             else {
                 const data = yield req.json();
-                data.containers.forEach(e => {
-                    e.image = config.image;
-                });
+                for (const index of targetContainers) {
+                    if (data.containers[index]) {
+                        data.containers[index].image = config.image;
+                    }
+                }
                 const { actions } = data;
                 const req2 = yield (0, node_fetch_1.default)(actions.redeploy, {
                     method: 'PUT',
