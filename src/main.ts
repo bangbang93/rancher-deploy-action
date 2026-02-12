@@ -28,5 +28,5 @@ import Rancher from './rancher';
     throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
   }
 })().catch(err => {
-  core.setFailed(err.message);
+  core.setFailed(err);
 });
