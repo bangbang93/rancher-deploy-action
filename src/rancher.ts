@@ -1,4 +1,5 @@
-import fetch from 'node-fetch';
+import got, {HTTPError} from 'got';
+import {URL} from 'url';
 
 type DeploymentConfig = {
   image: string;
@@ -51,15 +52,22 @@ type Project = {
 };
 
 class Rancher {
-  private readonly headers: any;
+  private readonly headers: Record<string, string>;
+  private readonly gotInstance: typeof got;
 
   constructor(private readonly rancherUrlApi: string, rancherAccessKey: string, rancherSecretKey: string) {
     const token = Buffer.from(rancherAccessKey + ':' + rancherSecretKey).toString('base64');
     this.headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + token,
+      Authorization: 'Basic ' + token
     };
+
+    this.gotInstance = got.extend({
+      headers: this.headers,
+      responseType: 'json',
+      throwHttpErrors: true
+    });
   }
 
   async fetchProjectsAsync(projectId?: string) {
@@ -67,14 +75,11 @@ class Rancher {
     if (projectId) {
       url.searchParams.append('id', projectId);
     }
-    const req = await fetch(url.toString(), {
-      method: 'GET',
-      headers: this.headers
-    });
 
-    return req.json() as Promise<{
+    const response = await this.gotInstance.get(url.toString()).json();
+    return response as {
       data: Project[];
-    }>;
+    };
   }
 
   async fetchProjectWorkloadsAsync(project: Project, namespaceId?: string) {
@@ -83,41 +88,19 @@ class Rancher {
     if (namespaceId) {
       url.searchParams.append('namespaceId', namespaceId);
     }
-    const req = await fetch(url.toString(), {
-      method: 'GET',
-      headers: this.headers
-    });
 
-    return req.json() as Promise<{
+    const response = await this.gotInstance.get(url.toString()).json();
+    return response as {
       data: Workload[];
-    }>;
+    };
   }
 
   async changeImageAsync(wl: Workload, config: DeploymentConfig, targetContainers: number[] = [0]): Promise<Workload> {
     const {links} = wl;
 
-    const req = await fetch(links.self, {method: 'GET', headers: this.headers});
-    if (req.status === 404) {
-      const data = {
-        containers: [
-          {
-            ...config,
-            imagePullPolicy: 'Always'
-          }
-        ],
-        name: config.name,
-        namespaceId: wl.namespaceId
-      };
+    try {
+      const data = (await this.gotInstance.get(links.self).json()) as any;
 
-      const req2 = await fetch(links.update, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(data)
-      });
-
-      return req2.json() as Promise<Workload>;
-    } else {
-      const data: any = await req.json();
       for (const index of targetContainers) {
         if (data.containers[index]) {
           data.containers[index].image = config.image;
@@ -125,13 +108,35 @@ class Rancher {
       }
 
       const {actions} = data;
-      const req2 = await fetch(actions.redeploy, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(data)
-      });
+      const response = await this.gotInstance
+        .post(actions.redeploy, {
+          json: data
+        })
+        .json();
 
-      return req2.json() as Promise<Workload>;
+      return response as Workload;
+    } catch (error: any) {
+      if (error instanceof HTTPError && error.response.statusCode === 404) {
+        const data = {
+          containers: [
+            {
+              ...config,
+              imagePullPolicy: 'Always'
+            }
+          ],
+          name: config.name,
+          namespaceId: wl.namespaceId
+        };
+
+        const response = await this.gotInstance
+          .post(links.update, {
+            json: data
+          })
+          .json();
+
+        return response as Workload;
+      }
+      throw error;
     }
   }
 }

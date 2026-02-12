@@ -24,13 +24,13 @@
   "homepage": "https://github.com/giautm/rancher-deploy-action#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "node-fetch": "3.0.0"
+    "got": "14.4.6"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.5",
     "@tsconfig/node20": "^20.1.9",
     "@types/node": "^14.17.4",
-    "@types/node-fetch": "3.0.3",
+    "@types/got": "9.6.12",
     "@vercel/ncc": "^0.38.3",
     "prettier": "^2.3.1",
     "release-it": "^19.2.4",

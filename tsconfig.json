@@ -4,7 +4,8 @@
     "outDir": "./lib",
     "rootDir": "./src",
     "esModuleInterop": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "lib": ["ES2020"]
   },
   "exclude": [
     "node_modules",
