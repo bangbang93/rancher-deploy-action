@@ -126,7 +126,7 @@ class Rancher {
 
       const {actions} = data;
       const req2 = await fetch(actions.redeploy, {
-        method: 'PUT',
+        method: 'POST',
         headers: this.headers,
         body: JSON.stringify(data)
       });
