@@ -5702,51 +5702,15 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util");
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("zlib");
 
-/***/ })
+/***/ }),
 
-/******/ });
-/************************************************************************/
-/******/ // The module cache
-/******/ var __webpack_module_cache__ = {};
-/******/ 
-/******/ // The require function
-/******/ function __nccwpck_require__(moduleId) {
-/******/ 	// Check if module is in cache
-/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 	if (cachedModule !== undefined) {
-/******/ 		return cachedModule.exports;
-/******/ 	}
-/******/ 	// Create a new module (and put it into the cache)
-/******/ 	var module = __webpack_module_cache__[moduleId] = {
-/******/ 		// no module.id needed
-/******/ 		// no module.loaded needed
-/******/ 		exports: {}
-/******/ 	};
-/******/ 
-/******/ 	// Execute the module function
-/******/ 	var threw = true;
-/******/ 	try {
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
-/******/ 		threw = false;
-/******/ 	} finally {
-/******/ 		if(threw) delete __webpack_module_cache__[moduleId];
-/******/ 	}
-/******/ 
-/******/ 	// Return the exports of the module
-/******/ 	return module.exports;
-/******/ }
-/******/ 
-/************************************************************************/
-/******/ /* webpack/runtime/compat */
-/******/ 
-/******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
-/******/ 
-/************************************************************************/
-var __webpack_exports__ = {};
+/***/ 6048:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(7484);
-;// CONCATENATED MODULE: ./lib/context.js
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   G: () => (/* binding */ getInputs)
+/* harmony export */ });
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7484);
 
 async function getInputs() {
     if (!process.env.GITHUB_ACTIONS) {
@@ -5765,18 +5729,70 @@ async function getInputs() {
     }
     return {
         rancher: {
-            accessKey: core.getInput('rancherAccessKey'),
-            secretKey: core.getInput('rancherSecretKey'),
-            urlApi: core.getInput('rancherUrlApi')
+            accessKey: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('rancherAccessKey'),
+            secretKey: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('rancherSecretKey'),
+            urlApi: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('rancherUrlApi')
         },
-        serviceName: core.getInput('serviceName'),
-        dockerImage: core.getInput('dockerImage'),
-        projectId: core.getInput('projectId'),
-        namespaceId: core.getInput('namespaceId'),
-        targetContainers: core.getInput('targetContainers') ? core.getInput('targetContainers').split(',').map(Number) : undefined
+        serviceName: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('serviceName'),
+        dockerImage: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('dockerImage'),
+        projectId: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('projectId'),
+        namespaceId: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('namespaceId'),
+        targetContainers: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('targetContainers') ? _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('targetContainers').split(',').map(Number) : undefined
     };
 }
 //# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 342:
+/***/ ((__webpack_module__, __unused_webpack___webpack_exports__, __nccwpck_require__) => {
+
+__nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7484);
+/* harmony import */ var _context_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(6048);
+/* harmony import */ var _rancher_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(8109);
+
+
+
+try {
+    const input = await (0,_context_js__WEBPACK_IMPORTED_MODULE_1__/* .getInputs */ .G)();
+    const { rancher, dockerImage, serviceName, projectId, namespaceId } = input;
+    const client = new _rancher_js__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .A(rancher.urlApi, rancher.accessKey, rancher.secretKey);
+    let findOne = false;
+    const { data: projects } = await client.fetchProjectsAsync(projectId);
+    for (const project of projects) {
+        const { data: workloads } = await client.fetchProjectWorkloadsAsync(project);
+        for (const workload of workloads) {
+            const result = await client.changeImageAsync(workload, {
+                name: serviceName,
+                image: dockerImage
+            }, input.targetContainers);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Image changed for ${result.id}`);
+            findOne = true;
+        }
+    }
+    if (!findOne) {
+        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
+    }
+}
+catch (err) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(err);
+}
+//# sourceMappingURL=main.js.map
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } }, 1);
+
+/***/ }),
+
+/***/ 8109:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  A: () => (/* binding */ rancher)
+});
+
 ;// CONCATENATED MODULE: external "node:timers/promises"
 const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:timers/promises");
 ;// CONCATENATED MODULE: ./node_modules/@sindresorhus/is/distribution/utilities.js
@@ -13013,33 +13029,139 @@ class Rancher {
         }
     }
 }
-/* harmony default export */ const lib_rancher = (Rancher);
+/* harmony default export */ const rancher = (Rancher);
 //# sourceMappingURL=rancher.js.map
-;// CONCATENATED MODULE: ./lib/main.js
 
+/***/ })
 
-
-(async () => {
-    const input = await getInputs();
-    const { rancher, dockerImage, serviceName, projectId, namespaceId } = input;
-    const client = new lib_rancher(rancher.urlApi, rancher.accessKey, rancher.secretKey);
-    let findOne = false;
-    const { data: projects } = await client.fetchProjectsAsync(projectId);
-    for (const project of projects) {
-        const { data: workloads } = await client.fetchProjectWorkloadsAsync(project);
-        for (const workload of workloads) {
-            const result = await client.changeImageAsync(workload, {
-                name: serviceName,
-                image: dockerImage
-            }, input.targetContainers);
-            core.info(`Image changed for ${result.id}`);
-            findOne = true;
-        }
-    }
-    if (!findOne) {
-        throw new Error(`Couldn't found workload "${serviceName}" in namespace "${namespaceId}", project "${projectId}"`);
-    }
-})().catch(err => {
-    core.setFailed(err);
-});
-//# sourceMappingURL=main.js.map
+/******/ });
+/************************************************************************/
+/******/ // The module cache
+/******/ var __webpack_module_cache__ = {};
+/******/ 
+/******/ // The require function
+/******/ function __nccwpck_require__(moduleId) {
+/******/ 	// Check if module is in cache
+/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 	if (cachedModule !== undefined) {
+/******/ 		return cachedModule.exports;
+/******/ 	}
+/******/ 	// Create a new module (and put it into the cache)
+/******/ 	var module = __webpack_module_cache__[moduleId] = {
+/******/ 		// no module.id needed
+/******/ 		// no module.loaded needed
+/******/ 		exports: {}
+/******/ 	};
+/******/ 
+/******/ 	// Execute the module function
+/******/ 	var threw = true;
+/******/ 	try {
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 		threw = false;
+/******/ 	} finally {
+/******/ 		if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 	}
+/******/ 
+/******/ 	// Return the exports of the module
+/******/ 	return module.exports;
+/******/ }
+/******/ 
+/************************************************************************/
+/******/ /* webpack/runtime/async module */
+/******/ (() => {
+/******/ 	var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
+/******/ 	var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
+/******/ 	var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
+/******/ 	var resolveQueue = (queue) => {
+/******/ 		if(queue && queue.d < 1) {
+/******/ 			queue.d = 1;
+/******/ 			queue.forEach((fn) => (fn.r--));
+/******/ 			queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
+/******/ 		}
+/******/ 	}
+/******/ 	var wrapDeps = (deps) => (deps.map((dep) => {
+/******/ 		if(dep !== null && typeof dep === "object") {
+/******/ 			if(dep[webpackQueues]) return dep;
+/******/ 			if(dep.then) {
+/******/ 				var queue = [];
+/******/ 				queue.d = 0;
+/******/ 				dep.then((r) => {
+/******/ 					obj[webpackExports] = r;
+/******/ 					resolveQueue(queue);
+/******/ 				}, (e) => {
+/******/ 					obj[webpackError] = e;
+/******/ 					resolveQueue(queue);
+/******/ 				});
+/******/ 				var obj = {};
+/******/ 				obj[webpackQueues] = (fn) => (fn(queue));
+/******/ 				return obj;
+/******/ 			}
+/******/ 		}
+/******/ 		var ret = {};
+/******/ 		ret[webpackQueues] = x => {};
+/******/ 		ret[webpackExports] = dep;
+/******/ 		return ret;
+/******/ 	}));
+/******/ 	__nccwpck_require__.a = (module, body, hasAwait) => {
+/******/ 		var queue;
+/******/ 		hasAwait && ((queue = []).d = -1);
+/******/ 		var depQueues = new Set();
+/******/ 		var exports = module.exports;
+/******/ 		var currentDeps;
+/******/ 		var outerResolve;
+/******/ 		var reject;
+/******/ 		var promise = new Promise((resolve, rej) => {
+/******/ 			reject = rej;
+/******/ 			outerResolve = resolve;
+/******/ 		});
+/******/ 		promise[webpackExports] = exports;
+/******/ 		promise[webpackQueues] = (fn) => (queue && fn(queue), depQueues.forEach(fn), promise["catch"](x => {}));
+/******/ 		module.exports = promise;
+/******/ 		body((deps) => {
+/******/ 			currentDeps = wrapDeps(deps);
+/******/ 			var fn;
+/******/ 			var getResult = () => (currentDeps.map((d) => {
+/******/ 				if(d[webpackError]) throw d[webpackError];
+/******/ 				return d[webpackExports];
+/******/ 			}))
+/******/ 			var promise = new Promise((resolve) => {
+/******/ 				fn = () => (resolve(getResult));
+/******/ 				fn.r = 0;
+/******/ 				var fnQueue = (q) => (q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))));
+/******/ 				currentDeps.map((dep) => (dep[webpackQueues](fnQueue)));
+/******/ 			});
+/******/ 			return fn.r ? promise : getResult();
+/******/ 		}, (err) => ((err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue)));
+/******/ 		queue && queue.d < 0 && (queue.d = 0);
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/define property getters */
+/******/ (() => {
+/******/ 	// define getter functions for harmony exports
+/******/ 	__nccwpck_require__.d = (exports, definition) => {
+/******/ 		for(var key in definition) {
+/******/ 			if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 			}
+/******/ 		}
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/hasOwnProperty shorthand */
+/******/ (() => {
+/******/ 	__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/compat */
+/******/ 
+/******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
+/******/ 
+/************************************************************************/
+/******/ 
+/******/ // startup
+/******/ // Load entry module and return exports
+/******/ // This entry module used 'module' so it can't be inlined
+/******/ var __webpack_exports__ = __nccwpck_require__(342);
+/******/ __webpack_exports__ = await __webpack_exports__;
+/******/ 
