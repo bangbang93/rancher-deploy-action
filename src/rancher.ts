@@ -62,8 +62,12 @@ class Rancher {
     };
   }
 
-  async fetchProjectsAsync() {
-    const req = await fetch(`${this.rancherUrlApi}/projects`, {
+  async fetchProjectsAsync(projectId?: string) {
+    const url = new URL(`${this.rancherUrlApi}/projects`);
+    if (projectId) {
+      url.searchParams.append('id', projectId);
+    }
+    const req = await fetch(url.toString(), {
       method: 'GET',
       headers: this.headers
     });
@@ -73,9 +77,13 @@ class Rancher {
     }>;
   }
 
-  async fetchProjectWorkloadsAsync(project: Project) {
+  async fetchProjectWorkloadsAsync(project: Project, namespaceId?: string) {
     const {links} = project;
-    const req = await fetch(links.workloads, {
+    const url = new URL(links.workloads);
+    if (namespaceId) {
+      url.searchParams.append('namespaceId', namespaceId);
+    }
+    const req = await fetch(url.toString(), {
       method: 'GET',
       headers: this.headers
     });
@@ -85,7 +93,7 @@ class Rancher {
     }>;
   }
 
-  async changeImageAsync(wl: Workload, config: DeploymentConfig): Promise<Workload> {
+  async changeImageAsync(wl: Workload, config: DeploymentConfig, targetContainers: number[] = [0]): Promise<Workload> {
     const {links} = wl;
 
     const req = await fetch(links.self, {method: 'GET', headers: this.headers});
@@ -110,9 +118,11 @@ class Rancher {
       return req2.json() as Promise<Workload>;
     } else {
       const data: any = await req.json();
-      data.containers.forEach(e => {
-        e.image = config.image;
-      });
+      for (const index of targetContainers) {
+        if (data.containers[index]) {
+          data.containers[index].image = config.image;
+        }
+      }
 
       const {actions} = data;
       const req2 = await fetch(actions.redeploy, {

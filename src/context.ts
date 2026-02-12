@@ -8,7 +8,9 @@ export type Inputs = {
   };
   serviceName: string;
   dockerImage: string;
+  projectId?: string;
   namespaceId?: string;
+  targetContainers?: number[];
 };
 
 export async function getInputs(): Promise<Inputs> {
@@ -21,7 +23,9 @@ export async function getInputs(): Promise<Inputs> {
       },
       serviceName: process.env['SERVICE_NAME'] || '',
       dockerImage: process.env['DOCKER_IMAGE'] || '',
-      namespaceId: process.env['NAMESPACE_ID']
+      projectId: process.env['PROJECT_ID'],
+      namespaceId: process.env['NAMESPACE_ID'],
+      targetContainers: process.env['TARGET_CONTAINERS'] ? process.env['TARGET_CONTAINERS'].split(',').map(Number) : undefined
     };
   }
 
@@ -33,6 +37,8 @@ export async function getInputs(): Promise<Inputs> {
     },
     serviceName: core.getInput('serviceName'),
     dockerImage: core.getInput('dockerImage'),
-    namespaceId: core.getInput('namespaceId')
+    projectId: core.getInput('projectId'),
+    namespaceId: core.getInput('namespaceId'),
+    targetContainers: core.getInput('targetContainers') ? core.getInput('targetContainers').split(',').map(Number) : undefined
   };
 }
