@@ -1,6 +1,6 @@
 {
   "name": "rancher-deploy-action",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "Action to deploy docker image in rancher",
   "main": "lib/main.js",
   "scripts": {
