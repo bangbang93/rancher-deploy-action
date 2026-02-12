@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/bangbang93/rancher-deploy-action/compare/v0.2.0...v0.2.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* 少定义了一个变量 ([16f363d](https://github.com/bangbang93/rancher-deploy-action/commit/16f363dfc4c1a13c8ee8c886a8abc74dae6000ed))
+
 # [0.2.0](https://github.com/bangbang93/rancher-deploy-action/compare/v0.1.0...v0.2.0) (2026-02-12)
 
 
